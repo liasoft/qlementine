@@ -114,11 +114,22 @@ Popover::Popover(QWidget* parent)
   _opacityAnimation.setDuration(opacityAnimDuration);
   _opacityAnimation.setStartValue(startOpacityVar);
   _opacityAnimation.setEndValue(startOpacityVar);
-  setWindowOpacity(startOpacity);
-  QObject::connect(&_opacityAnimation, &QVariantAnimation::valueChanged, this, [this]() {
-    const auto currentOpacity = _opacityAnimation.currentValue().toDouble();
-    setWindowOpacity(currentOpacity);
+
+  // Queue the initial value to the event loop, so we don't need to call setWindowOpacity during initialization.
+  QTimer::singleShot(0, &_opacityAnimation, [this](){
+    Q_EMIT _opacityAnimation.valueChanged(static_cast<double>(0.0));
   });
+
+  QObject::connect(&_opacityAnimation, &QVariantAnimation::valueChanged, this, [this]() {
+    // The visual effect is only visible if enabled, otherwise we simply open or close once the regular
+    // animation would be done, saving calls to setWindowOpacity which isn't supported on all platforms.
+    // Qt may warn about: "This plugin does not support setting window opacity", giving users the flexibility to simply turn-off this.
+    if (animatedWindowOpacity()) {
+      const auto currentOpacity = _opacityAnimation.currentValue().toDouble();
+      setWindowOpacity(currentOpacity);
+    }
+  });
+
   QObject::connect(&_opacityAnimation, &QVariantAnimation::finished, this, [this]() {
     if (_opened) {
       Q_EMIT opened();
@@ -444,6 +455,18 @@ void Popover::setAnimated(bool animated) {
   if (animated != _animated) {
     _animated = animated;
     Q_EMIT animatedChanged();
+    update();
+  }
+}
+
+bool Popover::animatedWindowOpacity() const {
+  return _animatedWindowOpacity;
+}
+
+void Popover::setAnimatedWindowOpacity(bool animated) {
+  if (animated != _animatedWindowOpacity) {
+    _animatedWindowOpacity = animated;
+    Q_EMIT animatedWindowOpacityChanged();
     update();
   }
 }

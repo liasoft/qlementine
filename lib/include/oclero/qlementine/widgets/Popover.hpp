@@ -39,6 +39,7 @@ class Popover : public QWidget {
   Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor NOTIFY backgroundColorChanged)
   Q_PROPERTY(QColor borderColor READ borderColor WRITE setBorderColor NOTIFY borderColorChanged)
   Q_PROPERTY(bool animated READ animated WRITE setAnimated NOTIFY animatedChanged)
+  Q_PROPERTY(bool animatedWindowOpacity READ animatedWindowOpacity WRITE setAnimatedWindowOpacity NOTIFY animatedWindowOpacityChanged)
 
 public:
   enum class Position {
@@ -142,6 +143,10 @@ public:
   void setAnimated(bool animated);
   Q_SIGNAL void animatedChanged();
 
+  bool animatedWindowOpacity() const;
+  void setAnimatedWindowOpacity(bool animated);
+  Q_SIGNAL void animatedWindowOpacityChanged();
+
 public Q_SLOTS:
   void openPopover();
   void closePopover();
@@ -205,6 +210,7 @@ private:
   bool _canBeOverAnchor{ true };
   bool _deleteContentAfterClosing{ false };
   bool _animated{ true };
+  bool _animatedWindowOpacity{ true };
   QTimer _clickTimer;
   QColor _dropShadowColor{ QColor(0, 0, 0, 76) };
   qreal _dropShadowRadius{ 12. };
