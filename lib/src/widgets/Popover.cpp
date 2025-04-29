@@ -26,12 +26,6 @@ constexpr auto closeAnimationDurationFactor = .9;
 
 constexpr auto defaultFramePadding = 16;
 
-#ifdef __APPLE__
-const bool Popover::_shouldDrawDropShadow = false;
-#else
-const bool Popover::_shouldDrawDropShadow = true;
-#endif
-
 // Sert de conteneur au contenu du Popover.
 class Popover::PopoverFrame : public QWidget {
 private:
@@ -69,18 +63,19 @@ public:
 
 Popover::Popover(QWidget* parent)
   : QWidget(parent) {
+
   setAttribute(Qt::WA_TranslucentBackground, true);
   setAttribute(Qt::WA_OpaquePaintEvent, false);
   setAttribute(Qt::WA_NoSystemBackground, true);
   setWindowFlag(Qt::WindowType::Popup, true);
   setWindowFlag(Qt::WindowType::FramelessWindowHint, true);
-  if (_shouldDrawDropShadow) {
+#ifdef __APPLE__
     // We draw the drop shadow ourselves.
     setWindowFlag(Qt::WindowType::NoDropShadowWindowHint, true);
-  } else {
+#else
     // Let the system draw the drop shadow.
     setWindowFlag(Qt::WindowType::NoDropShadowWindowHint, false);
-  }
+#endif
 
   setBackgroundRole(QPalette::NoRole);
   setAutoFillBackground(false);
@@ -484,7 +479,7 @@ void Popover::paintEvent(QPaintEvent*) {
   p.setRenderHint(QPainter::Antialiasing, true);
 
   // Drop shadow.
-  if (_shouldDrawDropShadow) {
+  if (shouldDrawDropShadow()) {
     // Update cache if necessary.
     if (_dropShadowCache.frameSize != size()) {
       updateDropShadowCache();
@@ -563,7 +558,7 @@ QMargins Popover::dropShadowMargins() const {
 }
 
 void Popover::updateDropShadowMargins() {
-  if (_shouldDrawDropShadow) {
+  if (shouldDrawDropShadow()) {
     const auto spaceForShadow = qlementine::blurRadiusNecessarySpace(_dropShadowRadius);
     const auto margins = QMargins{
       static_cast<int>(std::ceil(spaceForShadow - _dropShadowOffset.x())), // left
@@ -578,7 +573,7 @@ void Popover::updateDropShadowMargins() {
 }
 
 void Popover::updateDropShadowCache() {
-  if (_shouldDrawDropShadow) {
+  if (shouldDrawDropShadow()) {
     const auto framePixmap = getFrameShape();
     _dropShadowCache.frameSize = size();
     _dropShadowCache.shadowPixmap = qlementine::getDropShadowPixmap(framePixmap, _dropShadowRadius, _dropShadowColor);
@@ -872,4 +867,9 @@ bool Popover::hitboxContainsPoint(const QPointF& pos) const {
   const auto& frameRect = _frame->geometry().toRectF();
   return qlementine::isPointInRoundedRect(pos, frameRect, _radius);
 }
+
+bool Popover::shouldDrawDropShadow() const {
+  return !(windowFlags() & Qt::WindowType::NoDropShadowWindowHint);
+}
+
 } // namespace oclero::qlementine

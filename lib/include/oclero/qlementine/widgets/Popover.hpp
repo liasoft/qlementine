@@ -180,6 +180,7 @@ private:
   QPixmap getFrameShape() const;
   QBitmap getFrameMask() const;
   bool hitboxContainsPoint(const QPointF& pos) const;
+  bool shouldDrawDropShadow() const;
 
 private:
   bool _manualPositioning{ false };
@@ -213,6 +214,5 @@ private:
   QColor _backgroundColor{};
   QColor _borderColor{};
   std::function<QPoint()> _manualPositioningCb;
-  static const bool _shouldDrawDropShadow;
 };
 } // namespace oclero::qlementine
