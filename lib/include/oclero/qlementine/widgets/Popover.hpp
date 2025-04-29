@@ -38,6 +38,7 @@ class Popover : public QWidget {
       deleteContentAfterClosingChanged)
   Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor NOTIFY backgroundColorChanged)
   Q_PROPERTY(QColor borderColor READ borderColor WRITE setBorderColor NOTIFY borderColorChanged)
+  Q_PROPERTY(bool animated READ animated WRITE setAnimated NOTIFY animatedChanged)
 
 public:
   enum class Position {
@@ -136,6 +137,10 @@ public:
   const QColor& borderColor() const;
   void setBorderColor(const QColor&);
   Q_SIGNAL void borderColorChanged();
+
+  bool animated() const;
+  void setAnimated(bool animated);
+  Q_SIGNAL void animatedChanged();
 
 public Q_SLOTS:
   void openPopover();

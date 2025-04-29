@@ -441,6 +441,18 @@ void Popover::setBorderColor(const QColor& color) {
   }
 }
 
+bool Popover::animated() const {
+  return _animated;
+}
+
+void Popover::setAnimated(bool animated) {
+  if (animated != _animated) {
+    _animated = animated;
+    Q_EMIT animatedChanged();
+    update();
+  }
+}
+
 void Popover::openPopover() {
   setOpened(true);
   updatePopoverGeometry();
